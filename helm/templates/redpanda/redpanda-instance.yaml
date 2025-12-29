@@ -1,3 +1,5 @@
+{{ if .Values.redpanda.enabled }}
+
 apiVersion: cluster.redpanda.com/v1alpha2
 kind: Redpanda
 metadata:
@@ -15,3 +17,5 @@ spec:
         setDataDirOwnership:
           enabled: false
     enterprise: null
+
+{{ end }}
