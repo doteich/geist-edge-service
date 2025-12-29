@@ -1,0 +1,9 @@
+dependencies:
+- name: operator
+  repository: https://charts.redpanda.com
+  version: 25.3.1
+- name: connect
+  repository: https://charts.redpanda.com
+  version: 3.1.0
+digest: sha256:c05bd38e5a2ba509d3022b2ff64d7ebbe5e5b1c9e31b0d69dd3de01fd06ab8c7
+generated: "2025-12-27T20:01:35.3233372+01:00"

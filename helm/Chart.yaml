@@ -1,0 +1,17 @@
+apiVersion: v1
+name: geist-edge-service
+version: 0.0.1
+description: Chart for bootstrapping the Geist edge service on kubernetes
+type: application
+home: https://github.com/doteich/geist
+dependencies: # A list of the chart requirements (optional)
+  - name: operator
+    version: v25.3.1
+    repository: https://charts.redpanda.com
+    condition: redpanda.enabled
+  - name: connect
+    version: 3.1.0
+    repository: https://charts.redpanda.com
+    condition: redpanda.enabled
+maintainers: # (optional)
+  - name: Max Eichhorn

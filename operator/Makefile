@@ -238,3 +238,15 @@ mv $(1) $(1)-$(3) ;\
 } ;\
 ln -sf $$(realpath $(1)-$(3)) $(1)
 endef
+
+
+.PHONY: copy-to-helm
+copy-to-helm: manifests kustomize ## Sync Kustomize output to Helm chart
+	mkdir -p ../helm/crds ../helm/templates
+	# 1. Export just the CRDs to the helm crds directory
+	$(KUSTOMIZE) build config/crd > ../helm/crds/crds.yaml
+	# 2. Export the controller resources (RBAC, Deployment, Service) to templates
+	# We use config/rbac here to avoid duplicating CRDs, or config/manager
+	# Note: You might need a custom kustomize overlay if config/default includes CRDs
+	$(KUSTOMIZE) build config/default > ../helm/templates/all-resources.yaml
+	# Optional: Clean up CRDs from the templates file if they are duplicated

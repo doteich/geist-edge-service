@@ -1,4 +1,4 @@
-apiVersion: geistconnectors.doteich.com/v1alpha
+apiVersion: geistconnectors.config.geist-iot.com/v1alpha
 kind: GeistConnector
 metadata:
   labels:
