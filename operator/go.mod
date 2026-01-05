@@ -1,4 +1,4 @@
-module geist-operator
+module github.com/doteich/geist-edge-service/operator
 
 go 1.24.5
 
