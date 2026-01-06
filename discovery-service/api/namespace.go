@@ -10,7 +10,7 @@ type GetNamespaceOutput struct {
 	}
 }
 
-func (a *AppState) GetDeployment(ctx context.Context, input *struct{}) (*GetNamespaceOutput, error) {
+func (a *AppState) GetNamespace(ctx context.Context, input *struct{}) (*GetNamespaceOutput, error) {
 	// n, _ := a.K8s.CoreV1().Namespaces().Get(ctx, "geist", v1.GetOptions{})
 	// fmt.Println(n.Name)
 	resp := &GetNamespaceOutput{}
