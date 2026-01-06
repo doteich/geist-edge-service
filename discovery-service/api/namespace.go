@@ -2,10 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
-
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 type GetNamespaceOutput struct {
@@ -14,16 +10,10 @@ type GetNamespaceOutput struct {
 	}
 }
 
-func (a *AppState) GetDeployment(ctx context.Context, input *struct{}) (*DeploymentOutput, error) {
+func (a *AppState) GetDeployment(ctx context.Context, input *struct{}) (*GetNamespaceOutput, error) {
 	// n, _ := a.K8s.CoreV1().Namespaces().Get(ctx, "geist", v1.GetOptions{})
 	// fmt.Println(n.Name)
-	resp := &DeploymentOutput{}
-
-	d := &appsv1.Deployment{}
-
-	a.K8s.Client.Get(ctx, types.NamespacedName{Namespace: a.K8s.Namespace}, d)
-
-	fmt.Println(d)
+	resp := &GetNamespaceOutput{}
 
 	return resp, nil
 }
