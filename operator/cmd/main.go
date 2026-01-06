@@ -25,8 +25,8 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	doteichv1alpha "geist-operator/api/v1alpha"
-	"geist-operator/internal/controller"
+	doteichv1alpha "github.com/doteich/geist-edge-service/operator/api/v1alpha"
+	"github.com/doteich/geist-edge-service/operator/internal/controller"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"

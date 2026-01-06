@@ -19,7 +19,8 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"geist-operator/api/v1alpha"
+
+	"github.com/doteich/geist-edge-service/operator/api/v1alpha"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"

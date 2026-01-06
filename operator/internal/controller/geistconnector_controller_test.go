@@ -27,7 +27,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	doteichv1alpha "geist-operator/api/v1alpha"
+	doteichv1alpha "github.com/doteich/geist-edge-service/operator/api/v1alpha"
 )
 
 var _ = Describe("GeistConnector Controller", func() {

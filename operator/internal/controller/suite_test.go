@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	doteichv1alpha "geist-operator/api/v1alpha"
+	doteichv1alpha "github.com/doteich/geist-edge-service/operator/api/v1alpha"
 	// +kubebuilder:scaffold:imports
 )
 

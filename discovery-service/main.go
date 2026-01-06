@@ -2,17 +2,17 @@ package main
 
 import (
 	"context"
-	"discovery-service/api"
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/doteich/geist-edge-service/discovery-service/api"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/joho/godotenv"
-	"k8s.io/client-go/kubernetes"
 )
 
 type Config struct {
@@ -24,6 +24,7 @@ type Config struct {
 	PublicKey        string
 	JwksURL          string
 	Alg              string
+	Namespace        string
 }
 
 func initConfig() *Config {
@@ -54,23 +55,42 @@ func initConfig() *Config {
 		PublicKey:        os.Getenv("PUBLIC_KEY"),
 		JwksURL:          os.Getenv("JWKS_URL"),
 		Alg:              os.Getenv("JWT_ENCRYPTION"),
+		Namespace:        os.Getenv("DEPLOYED_NAMESPACE"),
 	}
 }
 
-func createKubeClient(debugMode bool) (*kubernetes.Clientset, error) {
+func createKubeClient(debugMode bool, ns string) (api.K8s, error) {
 	if debugMode {
 		logger.Info("creating kubernetes client in debug mode")
-		return api.CreateDebugClient()
+		return api.CreateDebugClient(ns)
 	}
 	logger.Info("creating in-cluster kubernetes client")
-	return api.CreateInClusterClient()
+	return api.CreateInClusterClient(ns)
+}
+
+func RegisterRoutes(g *huma.Group, a *api.AppState) {
+	huma.Register(g, huma.Operation{
+		Method: http.MethodGet,
+		Path:   "/connect",
+	}, a.ConnectivityCheck)
+
+	huma.Register(g, huma.Operation{
+		Method: http.MethodGet,
+		Path:   "/namespace",
+	}, a.GetNamespace)
+
+	huma.Register(g, huma.Operation{
+		Method: http.MethodGet,
+		Path:   "/crds",
+	}, a.GetCRDs)
+
 }
 
 func main() {
 	config := initConfig()
 	InitLogger(config.LogLevel)
 
-	k8sClient, err := createKubeClient(config.DebugMode)
+	k8sClient, err := createKubeClient(config.DebugMode, config.Namespace)
 	if err != nil {
 		logger.Error("failed to create kubernetes client", "error", err)
 		return
@@ -107,10 +127,7 @@ func main() {
 	protected := huma.NewGroup(*apiState.HumaInstance, "/v1")
 	protected.UseMiddleware(apiState.RegisterAuthMiddleware)
 
-	huma.Register(protected, huma.Operation{
-		Method: http.MethodGet,
-		Path:   "/namespace",
-	}, apiState.GetNamespace)
+	RegisterRoutes(protected, &apiState)
 
 	logger.Info("starting server", "host", config.Host, "port", config.Port)
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", config.Host, config.Port), router); err != nil {
