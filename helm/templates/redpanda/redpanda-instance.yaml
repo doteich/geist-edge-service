@@ -5,6 +5,8 @@ kind: Redpanda
 metadata:
   name: redpanda
   namespace: {{.Release.Namespace}}
+  labels:
+    app.kubernetes.io/name: geist-redpanda
 spec:
   clusterSpec:
     external:

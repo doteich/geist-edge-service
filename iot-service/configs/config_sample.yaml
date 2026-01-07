@@ -1,0 +1,34 @@
+opcua:
+  connection:
+    endpoint: 127.0.0.1
+    port: 49320
+    mode: "SignAndEncrypt"           # Possible Entries: 'None', 'Sign', 'SignAndEncrypt'
+    policy: 'Basic256Sha256'         # Possible Entries: 'None', 'Basic256', 'Basic256Sha256', 'Aes256Sha256RsaPss', 'Aes128Sha256RsaOaep'
+    authentication:
+      type: 'None'                   # Possible Entries: 'None', 'User&Password', 'Certificate'
+      credentials:                   # Only necessary if type is 'User&Password'
+        username: ''
+        password: ''
+      certificate:                   # Only necessary if type is 'Certificate'
+        certificate_path: ''         # absolute path to certificate file pem encoded
+        private_key_path: ''         # absolute path to private key file pem encoded
+    certificate:                     # Only necessary if mode is 'Sign' or 'SignAndEncrypt'
+        auto_create: true            # if true, the application will create a self-signed cert on startup, external provided certs are ignored
+        certificate_path: ''         # absolute path to certificate file used for signing/encryption pem encoded - 
+        private_key_path: ''         # absolute path to private key file used for signing/encryption pem encoded
+    retry_count: 10                  # Number of Retries the the connection should retried to the server
+  subscription:
+    sub_interval: 10                 # Subcription Interval in Seconds           
+    nodeids:                         # List of Node IDs and associated meta information in key value pairs
+      - id: i=2258
+redpanda:
+  brokers:                        # List of Redpanda brokers in format hostname:port
+    - localhost:31644
+  topic: geist                    # Name of the Redpanda topic
+  auth: 
+    sasl:
+      type: scram-sha-256         # Possible Entries: plain, scram-sha-256 or scram-sha-512
+      user: username              # Username for the Redpanda Connection
+      password: password          # Password for the Redpanda Connection
+  tls:
+    insecure_skip_verify: false   # set to true to ignore self-signed certificates
