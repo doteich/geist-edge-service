@@ -12,6 +12,7 @@ type AppState struct {
 	Auth         AuthState
 	HumaInstance *huma.API
 	K8s          K8s
+	CORS         string
 }
 
 type K8s struct {

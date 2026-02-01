@@ -11,20 +11,21 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
-
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	LogLevel         string
-	Port             string
-	Host             string
-	DebugMode        bool
-	VerificationType string
-	PublicKey        string
-	JwksURL          string
-	Alg              string
-	Namespace        string
+	LogLevel           string
+	Port               string
+	Host               string
+	DebugMode          bool
+	VerificationType   string
+	PublicKey          string
+	JwksURL            string
+	Alg                string
+	Namespace          string
+	CORSAllowedOrigins string
 }
 
 func initConfig() *Config {
@@ -47,15 +48,16 @@ func initConfig() *Config {
 	debugMode := os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "TRUE"
 
 	return &Config{
-		LogLevel:         os.Getenv("LOG_LEVEL"),
-		Port:             port,
-		Host:             host,
-		DebugMode:        debugMode,
-		VerificationType: v_type,
-		PublicKey:        os.Getenv("PUBLIC_KEY"),
-		JwksURL:          os.Getenv("JWKS_URL"),
-		Alg:              os.Getenv("JWT_ENCRYPTION"),
-		Namespace:        os.Getenv("DEPLOYED_NAMESPACE"),
+		LogLevel:           os.Getenv("LOG_LEVEL"),
+		Port:               port,
+		Host:               host,
+		DebugMode:          debugMode,
+		VerificationType:   v_type,
+		PublicKey:          os.Getenv("PUBLIC_KEY"),
+		JwksURL:            os.Getenv("JWKS_URL"),
+		Alg:                os.Getenv("JWT_ENCRYPTION"),
+		Namespace:          os.Getenv("DEPLOYED_NAMESPACE"),
+		CORSAllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
 	}
 }
 
@@ -109,8 +111,19 @@ func main() {
 	}
 
 	router := chi.NewMux()
-	humaAPI := humachi.New(router, humaConf)
 
+	router.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
+	humaAPI := humachi.New(router, humaConf)
 	auth, err := api.InitAuth(ctx, config.VerificationType, config.PublicKey, config.Alg, config.JwksURL)
 
 	if err != nil {
@@ -122,10 +135,12 @@ func main() {
 		Auth:         auth,
 		HumaInstance: &humaAPI,
 		K8s:          k8sClient,
+		CORS:         config.CORSAllowedOrigins,
 	}
 
 	protected := huma.NewGroup(*apiState.HumaInstance, "/v1")
 	protected.UseMiddleware(apiState.RegisterAuthMiddleware)
+	//protected.UseMiddleware(apiState.RegisterCORSMiddleware)
 
 	RegisterRoutes(protected, &apiState)
 

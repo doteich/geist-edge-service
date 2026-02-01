@@ -86,6 +86,7 @@ func InitCache(jwksURL string, ctx context.Context) (*jwk.Cache, error) {
 func (a AppState) RegisterAuthMiddleware(ctx huma.Context, next func(huma.Context)) {
 
 	authHeader := ctx.Header("Authorization")
+
 	if !strings.HasPrefix(authHeader, "Bearer ") {
 		huma.WriteErr(*a.HumaInstance, ctx, http.StatusUnauthorized, "invalid or missing token", fmt.Errorf("missing bearer token"))
 
