@@ -100,18 +100,21 @@ func (a AppState) RegisterAuthMiddleware(ctx huma.Context, next func(huma.Contex
 	if a.Auth.ValidationType == "LOCAL" {
 		_, err = jwt.Parse([]byte(tokenStr), jwt.WithKey(a.Auth.Alg, a.Auth.Key))
 		if err != nil {
-			huma.WriteErr(*a.HumaInstance, ctx, http.StatusUnauthorized, "invalid or missing token", fmt.Errorf("missing bearer token"))
+			fmt.Println(err)
+			huma.WriteErr(*a.HumaInstance, ctx, http.StatusUnauthorized, "invalid or missing token", fmt.Errorf("invalid bearer token"))
 			return
 		}
 	} else {
 		keyset, err := a.Auth.Cache.Get(ctx.Context(), a.Auth.JwksURL)
 		if err != nil {
-			huma.WriteErr(*a.HumaInstance, ctx, http.StatusUnauthorized, "invalid or missing token", fmt.Errorf("missing bearer token"))
+			fmt.Println(err)
+			huma.WriteErr(*a.HumaInstance, ctx, http.StatusUnauthorized, "invalid or missing token", fmt.Errorf("invalid bearer token"))
 			return
 		}
 		_, err = jwt.Parse([]byte(tokenStr), jwt.WithKeySet(keyset))
 		if err != nil {
-			huma.WriteErr(*a.HumaInstance, ctx, http.StatusUnauthorized, "invalid or missing token", fmt.Errorf("missing bearer token"))
+			fmt.Println(err)
+			huma.WriteErr(*a.HumaInstance, ctx, http.StatusUnauthorized, "invalid or missing token", fmt.Errorf("invalid bearer token"))
 			return
 		}
 	}
