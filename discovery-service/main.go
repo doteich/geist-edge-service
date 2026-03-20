@@ -86,6 +86,11 @@ func RegisterRoutes(g *huma.Group, a *api.AppState) {
 		Path:   "/crds",
 	}, a.GetCRDs)
 
+	huma.Register(g, huma.Operation{
+		Method: http.MethodGet,
+		Path:   "/deployments/{namespace}",
+	}, a.GetDeployments)
+
 }
 
 func main() {

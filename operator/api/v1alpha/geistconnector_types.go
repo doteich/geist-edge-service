@@ -41,11 +41,11 @@ type GeistConnectorSpec struct {
 
 	// DeploymentSpec contains Kubernetes-specific configuration for the application's deployment.
 	// +kubebuilder:validation:Required
-	DeploymentSpec DeploymentSpec `json:"deploymentSpec"`
+	GeistDeploymentSpec GeistDeploymentSpec `json:"deploymentSpec"`
 }
 
 // DeploymentSpec holds Kubernetes deployment-specific configuration.
-type DeploymentSpec struct {
+type GeistDeploymentSpec struct {
 	// The container image repository (e.g., myregistry/collector).
 	// +kubebuilder:default=doteich/geist-connector
 	// +kubebuilder:validation:Required

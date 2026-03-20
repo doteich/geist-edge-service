@@ -178,8 +178,8 @@ func (r *GeistConnectorReconciler) desiredConfigMap(gc *v1alpha.GeistConnector) 
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      gc.Name + "-config",
-			Namespace: r.OperatorNamespace,                 // Use namespace from spec
-			Labels:    gc.Spec.DeploymentSpec.CustomLabels, // Use labels from spec
+			Namespace: r.OperatorNamespace,                      // Use namespace from spec
+			Labels:    gc.Spec.GeistDeploymentSpec.CustomLabels, // Use labels from spec
 		},
 		Data: map[string]string{
 			"config.yaml": string(bArr),
@@ -195,7 +195,7 @@ func (r *GeistConnectorReconciler) desiredConfigMap(gc *v1alpha.GeistConnector) 
 
 // desiredDeployment defines the desired Deployment object for a GeistConnector
 func (r *GeistConnectorReconciler) desiredDeployment(gc *v1alpha.GeistConnector) (*appsv1.Deployment, error) {
-	labels := gc.Spec.DeploymentSpec.CustomLabels
+	labels := gc.Spec.GeistDeploymentSpec.CustomLabels
 	if labels == nil {
 		labels = make(map[string]string)
 	}
@@ -204,11 +204,11 @@ func (r *GeistConnectorReconciler) desiredDeployment(gc *v1alpha.GeistConnector)
 
 	configMapName := gc.Name + "-config"
 
-	imageName := gc.Spec.DeploymentSpec.ImageRepo + ":" + gc.Spec.DeploymentSpec.ImageVersion
+	imageName := gc.Spec.GeistDeploymentSpec.ImageRepo + ":" + gc.Spec.GeistDeploymentSpec.ImageVersion
 
 	var pp corev1.PullPolicy
 
-	switch gc.Spec.DeploymentSpec.PullPolicy {
+	switch gc.Spec.GeistDeploymentSpec.PullPolicy {
 	case "Never":
 		pp = corev1.PullAlways
 	case "IfNotPresent":
@@ -224,7 +224,7 @@ func (r *GeistConnectorReconciler) desiredDeployment(gc *v1alpha.GeistConnector)
 			Name:        gc.Name + "-deployment",
 			Namespace:   r.OperatorNamespace,
 			Labels:      labels,
-			Annotations: gc.Spec.DeploymentSpec.CustomAnnotations,
+			Annotations: gc.Spec.GeistDeploymentSpec.CustomAnnotations,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: ptr.To(replicas), // Default to one replica
@@ -292,7 +292,7 @@ func (r *GeistConnectorReconciler) desiredDeployment(gc *v1alpha.GeistConnector)
 
 func (r *GeistConnectorReconciler) desiredSecret(gc *v1alpha.GeistConnector) (*corev1.Secret, error) {
 
-	labels := gc.Spec.DeploymentSpec.CustomLabels
+	labels := gc.Spec.GeistDeploymentSpec.CustomLabels
 	if labels == nil {
 		labels = make(map[string]string)
 	}
@@ -306,7 +306,7 @@ func (r *GeistConnectorReconciler) desiredSecret(gc *v1alpha.GeistConnector) (*c
 			Name:        gc.Name + "-secret",
 			Namespace:   r.OperatorNamespace,
 			Labels:      labels,
-			Annotations: gc.Spec.DeploymentSpec.CustomAnnotations,
+			Annotations: gc.Spec.GeistDeploymentSpec.CustomAnnotations,
 		},
 		Data: data,
 	}
