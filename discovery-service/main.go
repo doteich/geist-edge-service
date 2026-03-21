@@ -16,16 +16,21 @@ import (
 )
 
 type Config struct {
-	LogLevel           string
-	Port               string
-	Host               string
-	DebugMode          bool
-	VerificationType   string
-	PublicKey          string
-	JwksURL            string
-	Alg                string
-	Namespace          string
-	CORSAllowedOrigins string
+	LogLevel                  string
+	Port                      string
+	Host                      string
+	DebugMode                 bool
+	VerificationType          string
+	PublicKey                 string
+	JwksURL                   string
+	Alg                       string
+	Namespace                 string
+	CORSAllowedOrigins        string
+	RedpandaConnectNameRef    string
+	RedpandaBrokerNameRef     string
+	RedpandaOperatorNameRef   string
+	GeistOperatorNameRef      string
+	GeistApiNameRef           string
 }
 
 func initConfig() *Config {
@@ -48,16 +53,21 @@ func initConfig() *Config {
 	debugMode := os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "TRUE"
 
 	return &Config{
-		LogLevel:           os.Getenv("LOG_LEVEL"),
-		Port:               port,
-		Host:               host,
-		DebugMode:          debugMode,
-		VerificationType:   v_type,
-		PublicKey:          os.Getenv("PUBLIC_KEY"),
-		JwksURL:            os.Getenv("JWKS_URL"),
-		Alg:                os.Getenv("JWT_ENCRYPTION"),
-		Namespace:          os.Getenv("DEPLOYED_NAMESPACE"),
-		CORSAllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
+		LogLevel:                os.Getenv("LOG_LEVEL"),
+		Port:                    port,
+		Host:                    host,
+		DebugMode:               debugMode,
+		VerificationType:        v_type,
+		PublicKey:               os.Getenv("PUBLIC_KEY"),
+		JwksURL:                 os.Getenv("JWKS_URL"),
+		Alg:                     os.Getenv("JWT_ENCRYPTION"),
+		Namespace:               os.Getenv("DEPLOYED_NAMESPACE"),
+		CORSAllowedOrigins:      os.Getenv("CORS_ALLOWED_ORIGINS"),
+		RedpandaConnectNameRef:  os.Getenv("REDPANDA_CONNECT_NAME_REF"),
+		RedpandaBrokerNameRef:   os.Getenv("REDPANDA_BROKER_NAME_REF"),
+		RedpandaOperatorNameRef: os.Getenv("REDPANDA_OPERATOR_NAME_REF"),
+		GeistOperatorNameRef:    os.Getenv("GEIST_OPERATOR_NAME_REF"),
+		GeistApiNameRef:         os.Getenv("GEIST_API_NAME_REF"),
 	}
 }
 
@@ -141,6 +151,15 @@ func main() {
 		HumaInstance: &humaAPI,
 		K8s:          k8sClient,
 		CORS:         config.CORSAllowedOrigins,
+		DeploymentFilters: api.DeploymentFilters{
+			Redpanda: []string{
+				config.RedpandaConnectNameRef,
+				config.RedpandaBrokerNameRef,
+				config.RedpandaOperatorNameRef,
+			},
+			GeistOperator: config.GeistOperatorNameRef,
+			GeistAPI:      config.GeistApiNameRef,
+		},
 	}
 
 	protected := huma.NewGroup(*apiState.HumaInstance, "/v1")

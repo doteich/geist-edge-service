@@ -8,6 +8,10 @@ metadata:
   labels:
     app.kubernetes.io/name: geist-redpanda
 spec:
+
+  fullnameOverride: geist-internal-redpanda
+  commonLabels:
+    geist-application-type: {{.Values.redpanda.geistAppType}}
   clusterSpec:
     external:
       enabled: true

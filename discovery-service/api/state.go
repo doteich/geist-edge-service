@@ -9,10 +9,17 @@ import (
 )
 
 type AppState struct {
-	Auth         AuthState
-	HumaInstance *huma.API
-	K8s          K8s
-	CORS         string
+	Auth              AuthState
+	HumaInstance      *huma.API
+	K8s               K8s
+	CORS              string
+	DeploymentFilters DeploymentFilters
+}
+
+type DeploymentFilters struct {
+	Redpanda      []string
+	GeistAPI      string
+	GeistOperator string
 }
 
 type K8s struct {

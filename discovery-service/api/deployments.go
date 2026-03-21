@@ -4,7 +4,6 @@ import (
 	"context"
 
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -12,9 +11,18 @@ type GetDeploymentsInput struct {
 	Namespace string `path:"namespace" example:"geist" doc:"The namespace to fetch deployments from"`
 }
 
+type DeploymentStatus struct {
+	Name          string `json:"name"`
+	Replicas      int32  `json:"replicas"`
+	ReadyReplicas int32  `json:"readyReplicas"`
+	Available     bool   `json:"available"`
+}
+
 type GetDeploymentsOutput struct {
 	Body struct {
-		Deployments []appsv1.Deployment `json:"deployments"`
+		Redpanda      []DeploymentStatus `json:"redpanda"`
+		GeistAPI      DeploymentStatus   `json:"Geist-API"`
+		GeistOperator DeploymentStatus   `json:"Geist-Operator"`
 	}
 }
 
@@ -30,17 +38,49 @@ func (a *AppState) GetDeployments(ctx context.Context, input *GetDeploymentsInpu
 		return resp, err
 	}
 
-	redacted := make([]appsv1.Deployment, 0)
-
 	for _, i := range list.Items {
-		for k := range i.Annotations {
-			delete(i.Annotations, k)
-		}
-		i.ManagedFields = make([]v1.ManagedFieldsEntry, 0)
-		redacted = append(redacted, i)
-	}
 
-	resp.Body.Deployments = redacted
+		status := DeploymentStatus{
+			Name:      i.Name,
+			Available: true,
+			Replicas:  1,
+		}
+
+		if i.Spec.Replicas != nil {
+			status.Replicas = *i.Spec.Replicas
+		}
+		status.ReadyReplicas = i.Status.ReadyReplicas
+
+		if status.ReadyReplicas < status.Replicas {
+			status.Available = false
+		}
+
+		isMatched := false
+		for _, labelValue := range i.Labels {
+			for _, filter := range a.DeploymentFilters.Redpanda {
+				if filter != "" && labelValue == filter {
+					resp.Body.Redpanda = append(resp.Body.Redpanda, status)
+					isMatched = true
+					break
+				}
+			}
+			if isMatched {
+				break
+			}
+
+			if a.DeploymentFilters.GeistAPI != "" && labelValue == a.DeploymentFilters.GeistAPI {
+				resp.Body.GeistAPI = status
+				isMatched = true
+				break
+			}
+
+			if a.DeploymentFilters.GeistOperator != "" && labelValue == a.DeploymentFilters.GeistOperator {
+				resp.Body.GeistOperator = status
+				isMatched = true
+				break
+			}
+		}
+	}
 
 	return resp, nil
 }

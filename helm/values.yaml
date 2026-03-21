@@ -1,32 +1,47 @@
-image:
-  repository: doteich/geist-operator
-  tag: latest
-  pullPolicy: IfNotPresent
+geistOperator:
+  image:
+    repository: doteich/geist-operator
+    tag: latest
+    pullPolicy: IfNotPresent
 
-replicaCount: 1
+  replicaCount: 1
 
-resources:
-  limits:
-    cpu: 500m
-    memory: 128Mi
-  requests:
-    cpu: 10m
-    memory: 64Mi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
 
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-      - ALL
-  readOnlyRootFilesystem: true
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
 
-runAsNonRoot: true
+  runAsNonRoot: true
 
-seccompProfile:
-  type: RuntimeDefault
+  seccompProfile:
+    type: RuntimeDefault
 
-operator:
-  crds:
-    enabled: true
+  geistAppType: geist-operator
+
+geistAPI:
+  geistAppType: geist-api
+
 redpanda:
   enabled: true
+  geistAppType: redpanda-broker
+
+# Redpanda
+operator:
+  fullnameOverride: geist-redpanda-operator
+  crds:
+    enabled: true
+  commonLabels:
+    geist-application-type: redpanda-operator
+connect:
+  commonLabels:
+    geist-application-type: redpanda-connect

@@ -7,7 +7,7 @@ metadata:
   name: geist-operator-controller-manager
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.geistOperator.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: geist-operator
@@ -18,6 +18,7 @@ spec:
         kubectl.kubernetes.io/default-container: manager
       labels:
         app.kubernetes.io/name: geist-operator
+        geist-application-type: geist-operator
         control-plane: controller-manager
     spec:
       containers:
@@ -27,8 +28,8 @@ spec:
         - --health-probe-bind-address=:8081
         command:
         - /manager
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.geistOperator.image.repository }}:{{ .Values.geistOperator.image.tag }}"
+        imagePullPolicy: {{ .Values.geistOperator.image.pullPolicy }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -50,21 +51,21 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: {{ .Values.resources.limits.cpu }}
-            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.geistOperator.resources.limits.cpu }}
+            memory: {{ .Values.geistOperator.resources.limits.memory }}
           requests:
-            cpu: {{ .Values.resources.requests.cpu }}
-            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.geistOperator.resources.requests.cpu }}
+            memory: {{ .Values.geistOperator.resources.requests.memory }}
         securityContext:
-          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          allowPrivilegeEscalation: {{ .Values.geistOperator.securityContext.allowPrivilegeEscalation }}
           capabilities:
             drop:
-{{ toYaml .Values.securityContext.capabilities.drop | indent 12 }}
-          readOnlyRootFilesystem: {{ .Values.securityContext.readOnlyRootFilesystem }}
+{{ toYaml .Values.geistOperator.securityContext.capabilities.drop | indent 12 }}
+          readOnlyRootFilesystem: {{ .Values.geistOperator.securityContext.readOnlyRootFilesystem }}
       securityContext:
-        runAsNonRoot: {{ .Values.runAsNonRoot }}
+        runAsNonRoot: {{ .Values.geistOperator.runAsNonRoot }}
         seccompProfile:
-          type: {{ .Values.seccompProfile.type }}
+          type: {{ .Values.geistOperator.seccompProfile.type }}
       serviceAccountName: geist-operator-controller-manager
       terminationGracePeriodSeconds: 10
       volumes: []
