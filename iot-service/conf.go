@@ -50,8 +50,9 @@ type OpcCerts struct {
 }
 
 type Nodeid struct {
-	Id   string          `mapstructure:"id"`
-	Meta []handlers.Meta `mapstructure:"meta"`
+	Id     string          `mapstructure:"id"`
+	Topics []string        `mapstructure:"topics"`
+	Meta   []handlers.Meta `mapstructure:"meta"`
 }
 
 func LoadConfig() (*Configuration, error) {

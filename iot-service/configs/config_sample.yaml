@@ -21,6 +21,12 @@ opcua:
     sub_interval: 10                 # Subcription Interval in Seconds           
     nodeids:                         # List of Node IDs and associated meta information in key value pairs
       - id: i=2258
+        topics: 
+          - topic1
+          - topic2
+        meta:
+          - key: foo
+            value: bar
 redpanda:
   brokers:                        # List of Redpanda brokers in format hostname:port
     - localhost:31644

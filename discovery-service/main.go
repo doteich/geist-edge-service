@@ -16,21 +16,21 @@ import (
 )
 
 type Config struct {
-	LogLevel                  string
-	Port                      string
-	Host                      string
-	DebugMode                 bool
-	VerificationType          string
-	PublicKey                 string
-	JwksURL                   string
-	Alg                       string
-	Namespace                 string
-	CORSAllowedOrigins        string
-	RedpandaConnectNameRef    string
-	RedpandaBrokerNameRef     string
-	RedpandaOperatorNameRef   string
-	GeistOperatorNameRef      string
-	GeistApiNameRef           string
+	LogLevel                string
+	Port                    string
+	Host                    string
+	DebugMode               bool
+	VerificationType        string
+	PublicKey               string
+	JwksURL                 string
+	Alg                     string
+	Namespace               string
+	CORSAllowedOrigins      string
+	RedpandaConnectNameRef  string
+	RedpandaBrokerNameRef   string
+	RedpandaOperatorNameRef string
+	GeistOperatorNameRef    string
+	GeistApiNameRef         string
 }
 
 func initConfig() *Config {
@@ -101,6 +101,16 @@ func RegisterRoutes(g *huma.Group, a *api.AppState) {
 		Path:   "/deployments/{namespace}",
 	}, a.GetDeployments)
 
+	huma.Register(g, huma.Operation{
+		Method: http.MethodPost,
+		Path:   "/opcua/connect",
+	}, a.CreateConnection)
+
+	huma.Register(g, huma.Operation{
+		Method: http.MethodPost,
+		Path:   "/opcua/browse",
+	}, a.Browse)
+
 }
 
 func main() {
@@ -167,6 +177,8 @@ func main() {
 	//protected.UseMiddleware(apiState.RegisterCORSMiddleware)
 
 	RegisterRoutes(protected, &apiState)
+
+	go api.HouseKeeper()
 
 	logger.Info("starting server", "host", config.Host, "port", config.Port)
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", config.Host, config.Port), router); err != nil {

@@ -90,14 +90,22 @@ func (r *Redpanda) Publish(ctx context.Context, p Payload) error {
 		return fmt.Errorf("failed to marshal payload: %v", err)
 	}
 
-	rec := &kgo.Record{
-		Key:       []byte(p.Id),
-		Topic:     r.Topic,
-		Timestamp: p.TS,
-		Value:     b,
+	topics := p.Topics
+	if len(topics) == 0 {
+		topics = []string{r.Topic}
 	}
 
-	results := r.Client.ProduceSync(produceCtx, rec)
+	recs := make([]*kgo.Record, 0, len(topics))
+	for _, topic := range topics {
+		recs = append(recs, &kgo.Record{
+			Key:       []byte(p.Id),
+			Topic:     topic,
+			Timestamp: p.TS,
+			Value:     b,
+		})
+	}
+
+	results := r.Client.ProduceSync(produceCtx, recs...)
 
 	// 2. Correctly check for errors
 	if err := results.FirstErr(); err != nil {

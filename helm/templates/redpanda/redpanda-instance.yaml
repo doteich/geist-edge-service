@@ -7,6 +7,8 @@ metadata:
   namespace: {{.Release.Namespace}}
   labels:
     app.kubernetes.io/name: geist-redpanda
+  annotations:
+     "helm.sh/hook": post-install
 spec:
 
   fullnameOverride: geist-internal-redpanda

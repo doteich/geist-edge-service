@@ -13,6 +13,7 @@ type Payload struct {
 	Datatype string      `json:"datatype"`
 	Server   string      `json:"server"`
 	Meta     []Meta      `json:"meta"`
+	Topics   []string    `json:"-"`
 }
 
 type Meta struct {

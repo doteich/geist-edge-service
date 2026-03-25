@@ -19,6 +19,7 @@ var (
 	current_retry_count = 0
 	Subs                map[uint32]*monitor.Subscription
 	current_client      *opcua.Client
+	nodeToTopics        map[string][]string
 )
 
 func (o *OpcConfig) InitSuperVisor(ctx context.Context) {
@@ -26,6 +27,11 @@ func (o *OpcConfig) InitSuperVisor(ctx context.Context) {
 	retry_count = o.Connection.Retries
 
 	Subs = make(map[uint32]*monitor.Subscription)
+	nodeToTopics = make(map[string][]string)
+
+	for _, n := range o.Subscription.Nodeids {
+		nodeToTopics[n.Id] = n.Topics
+	}
 
 	c, err := o.Connection.CreateClient(ctx)
 
@@ -189,7 +195,14 @@ func CreateSubscription(pctx context.Context, ctx context.Context, m *monitor.No
 				if dcm.NodeID.String() == "i=2258" {
 					last_keepalive = time.Now()
 				} else {
-					p := handlers.Payload{Value: dcm.Value.Value(), TS: dcm.SourceTimestamp, Name: dcm.NodeID.StringID(), Id: dcm.NodeID.String(), Datatype: dt}
+					p := handlers.Payload{
+						Value:    dcm.Value.Value(),
+						TS:       dcm.SourceTimestamp,
+						Name:     dcm.NodeID.StringID(),
+						Id:       dcm.NodeID.String(),
+						Datatype: dt,
+						Topics:   nodeToTopics[dcm.NodeID.String()],
+					}
 
 					go mgr.Publish(ctx, p)
 
