@@ -15,8 +15,9 @@ import (
 )
 
 type Session struct {
-	Client       *opcua.Client
-	LastAccessed time.Time
+	Client         *opcua.Client
+	LastAccessed   time.Time
+	isDisconnected bool
 }
 
 // Global map to store active connections
@@ -55,6 +56,16 @@ type CreateConnectionOutput struct {
 	}
 }
 
+type DisconnectSessionInput struct {
+	Body struct {
+		UUID string `json:"uuid"`
+	}
+}
+
+type DisconnectSessionOutput struct {
+	Status int
+}
+
 func HouseKeeper() { // Async Func for housekeeping
 
 	for {
@@ -63,7 +74,7 @@ func HouseKeeper() { // Async Func for housekeeping
 
 		mu.Lock()
 		for key, sess := range sessions {
-			if time.Since(sess.LastAccessed) > 10*time.Minute {
+			if time.Since(sess.LastAccessed) > 15*time.Minute || sess.isDisconnected {
 				if sess.Client != nil {
 					toClose = append(toClose, sess.Client)
 				}
@@ -97,8 +108,9 @@ func (a *AppState) CreateConnection(ctx context.Context, input *CreateConnection
 	defer mu.Unlock()
 
 	sessions[sessionID] = &Session{
-		Client:       client,
-		LastAccessed: time.Now(),
+		Client:         client,
+		LastAccessed:   time.Now(),
+		isDisconnected: false,
 	}
 
 	resp := &CreateConnectionOutput{}
@@ -189,4 +201,24 @@ func (c *CreateConnectionBody) CreateClient(ctx context.Context) (*opcua.Client,
 
 	return client, nil
 
+}
+
+func (a *AppState) DisconnectSession(ctx context.Context, input *DisconnectSessionInput) (*DisconnectSessionOutput, error) {
+
+	uuid := input.Body.UUID
+	resp := DisconnectSessionOutput{}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	sess, ok := sessions[uuid]
+	if !ok {
+		resp.Status = 404
+		return &resp, nil
+	}
+
+	sess.isDisconnected = true
+
+	resp.Status = 200
+	return &resp, nil
 }

@@ -111,6 +111,11 @@ func RegisterRoutes(g *huma.Group, a *api.AppState) {
 		Path:   "/opcua/browse",
 	}, a.Browse)
 
+	huma.Register(g, huma.Operation{
+		Method: http.MethodPost,
+		Path:   "/opcua/disconnect",
+	}, a.DisconnectSession)
+
 }
 
 func main() {
